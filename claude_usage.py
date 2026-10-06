@@ -2,12 +2,19 @@
 """Print one line of Claude usage for a status bar: credits spent of the monthly
 limit, or the 5-hour/7-day plan limits when usage credits are off."""
 import datetime
+import fcntl
 import json
 import pathlib
 import subprocess
 import sys
+import time
 import urllib.error
 import urllib.request
+
+# iTerm2 asks from every tab and the endpoint answers 429 when polled often, so
+# all callers share one answer for this long.
+CACHE = pathlib.Path.home() / ".cache/claude-usage"
+FRESH_SECONDS = 10 * 60
 
 
 def token():
@@ -47,19 +54,32 @@ def line(usage, today):
     return out + f" · resets {reset:%b} {reset.day}"
 
 
-def main():
+def fetch():
     request = urllib.request.Request(
         "https://api.anthropic.com/api/oauth/usage",
         headers={"Authorization": f"Bearer {token()}", "anthropic-beta": "oauth-2025-04-20"},
     )
-    try:
-        with urllib.request.urlopen(request, timeout=10) as response:
-            print(line(json.load(response), datetime.date.today()))
-    except urllib.error.HTTPError as e:
-        print("✻ login expired, run claude" if e.code == 401 else f"✻ HTTP {e.code}")
-    except OSError:
-        print("✻ offline")
+    with urllib.request.urlopen(request, timeout=10) as response:
+        return line(json.load(response), datetime.date.today())
+
+
+def status():
+    CACHE.parent.mkdir(parents=True, exist_ok=True)
+    with open(f"{CACHE}.lock", "w") as lock:
+        fcntl.flock(lock, fcntl.LOCK_EX)  # tabs refreshing together wait for one request
+        cached = CACHE.read_text(encoding="utf-8") if CACHE.exists() else None
+        if cached and time.time() - CACHE.stat().st_mtime < FRESH_SECONDS:
+            return cached
+        try:
+            text = fetch()
+        except urllib.error.HTTPError as e:
+            text = "✻ login expired, run claude" if e.code == 401 else cached or f"✻ HTTP {e.code}"
+        except OSError:
+            text = cached or "✻ offline"
+        # Rewriting a stale answer after a failure also waits FRESH_SECONDS before retrying.
+        CACHE.write_text(text, encoding="utf-8")
+        return text
 
 
 if __name__ == "__main__":
-    main()
+    print(status())
