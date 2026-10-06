@@ -14,7 +14,7 @@ async def main(connection):
         short_description="Claude usage",
         detailed_description="Claude usage credits spent of the monthly limit",
         knobs=[],
-        exemplar="✻ ▁ 6% · $90.07 / $1,366.00 · resets Nov 1",
+        exemplar="✻ ▰▱▱▱▱▱▱▱▱▱ 6% · $90.07 / $1,366.00 · resets Nov 1",
         update_cadence=15 * 60,
         identifier="com.antondudakov.claude-usage",
     )

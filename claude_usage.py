@@ -31,7 +31,9 @@ def token():
 
 
 def meter(percent):
-    return f"{'▁▂▃▄▅▆▇█'[round(min(percent, 100) / 100 * 7)]} {percent:.0f}%"
+    # ▰/▱ share a width; spaces would not in the status bar's proportional font.
+    filled = int(min(percent, 100) / 10 + 0.5)
+    return f"{'▰' * filled}{'▱' * (10 - filled)} {percent:.0f}%"
 
 
 def line(usage, today):

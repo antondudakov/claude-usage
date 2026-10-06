@@ -15,10 +15,10 @@ def credits(used):
 
 
 cases = {
-    9007: "✻ ▁ 6% · $90.07 / $1,366.00 · resets Nov 1",
-    86058: "✻ ▅ 63% · $860.58 / $1,366.00 · resets Nov 1",
-    125672: "✻ ▇ 92% · $1,256.72 / $1,366.00 · resets Nov 1",
-    150000: "✻ █ 109% · $1,500.00 / $1,366.00 · resets Nov 1",
+    9007: "✻ ▰▱▱▱▱▱▱▱▱▱ 6% · $90.07 / $1,366.00 · resets Nov 1",
+    86058: "✻ ▰▰▰▰▰▰▱▱▱▱ 63% · $860.58 / $1,366.00 · resets Nov 1",
+    125672: "✻ ▰▰▰▰▰▰▰▰▰▱ 92% · $1,256.72 / $1,366.00 · resets Nov 1",
+    150000: "✻ ▰▰▰▰▰▰▰▰▰▰ 109% · $1,500.00 / $1,366.00 · resets Nov 1",
 }
 for used, expected in cases.items():
     assert line(credits(used), today) == expected, line(credits(used), today)
@@ -28,7 +28,7 @@ assert line(credits(9007), december).endswith("resets Jan 1"), line(credits(9007
 
 plan = {"five_hour": {"utilization": 2.0}, "seven_day": {"utilization": 41.6},
         "extra_usage": {"is_enabled": False}}
-assert line(plan, today) == "✻ 5h ▁ 2% · 7d ▄ 42%", line(plan, today)
+assert line(plan, today) == "✻ 5h ▱▱▱▱▱▱▱▱▱▱ 2% · 7d ▰▰▰▰▱▱▱▱▱▱ 42%", line(plan, today)
 
 # One fetch per fresh window, the last answer kept through 429s, 401 always shown.
 claude_usage.CACHE = claude_usage.pathlib.Path(tempfile.mkdtemp()) / "claude-usage"

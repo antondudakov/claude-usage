@@ -3,10 +3,10 @@
 One line of Claude usage for a status bar:
 
 ```
-✻ ▁ 6% · $90.07 / $1,366.00 · resets Nov 1
+✻ ▰▱▱▱▱▱▱▱▱▱ 6% · $90.07 / $1,366.00 · resets Nov 1
 ```
 
-When usage credits are off it shows the plan limits instead: `✻ 5h ▁ 3% · 7d ▁ 0%`.
+When usage credits are off it shows the plan limits instead: `✻ 5h ▱▱▱▱▱▱▱▱▱▱ 3% · 7d ▱▱▱▱▱▱▱▱▱▱ 0%`.
 
 It reads the login Claude Code already keeps (macOS Keychain, or
 `~/.claude/.credentials.json` on Linux) and asks the same endpoint `/usage`
