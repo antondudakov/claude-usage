@@ -14,8 +14,10 @@ does. It never refreshes that login: if Claude Code has not run for a while it
 says `login expired, run claude` until you start `claude` once.
 
 The usage endpoint answers HTTP 429 when polled often, and iTerm2 asks from
-every tab, so the answer is cached in `~/.cache/claude-usage` and fetched at
-most once per 10 minutes. On an error it keeps showing the last answer.
+every tab, so the answer is cached in `~/.cache/claude-usage.json` and fetched
+at most once per 10 minutes. After a 429 it waits as long as the server's
+`Retry-After` asks (up to an hour, as Claude Code does). On an error it keeps
+showing the last answer.
 
 ## iTerm2 status bar (macOS)
 

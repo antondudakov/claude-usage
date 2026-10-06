@@ -12,9 +12,10 @@ import urllib.error
 import urllib.request
 
 # iTerm2 asks from every tab and the endpoint answers 429 when polled often, so
-# all callers share one answer for this long.
-CACHE = pathlib.Path.home() / ".cache/claude-usage"
+# all callers share one answer and the time it may next be asked.
+CACHE = pathlib.Path.home() / ".cache/claude-usage.json"
 FRESH_SECONDS = 10 * 60
+MAX_WAIT_SECONDS = 60 * 60  # Claude Code caps the endpoint's Retry-After here too
 
 
 def token():
@@ -67,19 +68,26 @@ def fetch():
 
 def status():
     CACHE.parent.mkdir(parents=True, exist_ok=True)
-    with open(f"{CACHE}.lock", "w") as lock:
+    with open(CACHE.with_suffix(".lock"), "w") as lock:
         fcntl.flock(lock, fcntl.LOCK_EX)  # tabs refreshing together wait for one request
-        cached = CACHE.read_text(encoding="utf-8") if CACHE.exists() else None
-        if cached and time.time() - CACHE.stat().st_mtime < FRESH_SECONDS:
-            return cached
+        try:
+            cached = json.loads(CACHE.read_text())
+        except (OSError, ValueError):
+            cached = {}
+        if time.time() < cached.get("next", 0):
+            return cached["text"]
+        wait = FRESH_SECONDS
         try:
             text = fetch()
         except urllib.error.HTTPError as e:
-            text = "✻ login expired, run claude" if e.code == 401 else cached or f"✻ HTTP {e.code}"
+            text = "✻ login expired, run claude" if e.code == 401 else cached.get("text") or f"✻ HTTP {e.code}"
+            if e.code == 429:
+                after = e.headers.get("Retry-After", "")
+                wait = min(max(int(after) if after.isdigit() else 0, FRESH_SECONDS), MAX_WAIT_SECONDS)
         except OSError:
-            text = cached or "✻ offline"
-        # Rewriting a stale answer after a failure also waits FRESH_SECONDS before retrying.
-        CACHE.write_text(text, encoding="utf-8")
+            text = cached.get("text") or "✻ offline"
+        # A failure keeps the last answer and still waits before asking again.
+        CACHE.write_text(json.dumps({"text": text, "next": time.time() + wait}))
         return text
 
 
