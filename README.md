@@ -1,0 +1,37 @@
+# claude-usage
+
+One line of Claude usage for a status bar:
+
+```
+✻ ▁ 6% · $90.07 / $1,366.00 · resets Nov 1
+```
+
+When usage credits are off it shows the plan limits instead: `✻ 5h ▁ 3% · 7d ▁ 0%`.
+
+It reads the login Claude Code already keeps (macOS Keychain, or
+`~/.claude/.credentials.json` on Linux) and asks the same endpoint `/usage`
+does. It never refreshes that login: if Claude Code has not run for a while it
+says `login expired, run claude` until you start `claude` once.
+
+## iTerm2 status bar (macOS)
+
+```sh
+ln -s "$PWD/claude_usage.py" ~/.local/bin/claude-usage
+mkdir -p ~/Library/Application\ Support/iTerm2/Scripts/AutoLaunch
+cp iterm2_claude_usage.py ~/Library/Application\ Support/iTerm2/Scripts/AutoLaunch/
+```
+
+1. iTerm2 → Settings → General → Magic → **Enable Python API**.
+2. Scripts → AutoLaunch → **iterm2_claude_usage.py** (first run downloads
+   iTerm2's Python runtime; after that it starts with iTerm2).
+3. Settings → Profiles → Session → **Status bar enabled** → Configure Status
+   Bar → drag **Claude usage** into the bar.
+
+It refreshes every 15 minutes (`update_cadence` in the iTerm2 script).
+
+## Anywhere else
+
+`claude-usage` just prints the line, so tmux works too:
+`set -g status-right '#(claude-usage)'` with `status-interval 900`.
+
+Check: `python3 test_claude_usage.py`.
