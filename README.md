@@ -3,8 +3,13 @@
 One line of Claude usage for a status bar:
 
 ```
-✻ ▰▱▱▱▱▱▱▱▱▱ 6% · $90.07 / $1,366.00 · resets Nov 1
+✻ $90/$1.4k ▰▱▱▱▱▱▱▱▱▱ 6% · Oct ▰▰▱▱▱▱▱▱▱▱ 18% · $16/d → +$858
 ```
+
+The first bar is credits spent of the monthly limit, the second how much of the
+month has gone; spend ahead of the month is spending too fast. `$16/d` is the
+spend per day so far, and `→ +$858` what is left of the limit at month's end if
+that pace holds; `→ -$300` means the limit runs out before the reset on the 1st.
 
 When usage credits are off it shows the plan limits instead: `✻ 5h ▱▱▱▱▱▱▱▱▱▱ 3% · 7d ▱▱▱▱▱▱▱▱▱▱ 0%`.
 

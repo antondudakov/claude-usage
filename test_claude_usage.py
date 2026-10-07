@@ -8,7 +8,7 @@ import urllib.error
 import claude_usage
 from claude_usage import line
 
-today = datetime.date(2026, 10, 6)
+today = datetime.datetime(2026, 10, 6, 12)  # 5.5 days into October
 
 
 def credits(used):
@@ -17,16 +17,22 @@ def credits(used):
 
 
 cases = {
-    9007: "✻ ▰▱▱▱▱▱▱▱▱▱ 6% · $90.07 / $1,366.00 · resets Nov 1",
-    86058: "✻ ▰▰▰▰▰▰▱▱▱▱ 63% · $860.58 / $1,366.00 · resets Nov 1",
-    125672: "✻ ▰▰▰▰▰▰▰▰▰▱ 92% · $1,256.72 / $1,366.00 · resets Nov 1",
-    150000: "✻ ▰▰▰▰▰▰▰▰▰▰ 109% · $1,500.00 / $1,366.00 · resets Nov 1",
+    0: "✻ $0/$1.4k ▱▱▱▱▱▱▱▱▱▱ 0% · Oct ▰▰▱▱▱▱▱▱▱▱ 18% · $0/d → +$1.4k",
+    9007: "✻ $90/$1.4k ▰▱▱▱▱▱▱▱▱▱ 6% · Oct ▰▰▱▱▱▱▱▱▱▱ 18% · $16/d → +$858",
+    86058: "✻ $861/$1.4k ▰▰▰▰▰▰▱▱▱▱ 63% · Oct ▰▰▱▱▱▱▱▱▱▱ 18% · $156/d → -$3.5k",
+    125672: "✻ $1.3k/$1.4k ▰▰▰▰▰▰▰▰▰▱ 92% · Oct ▰▰▱▱▱▱▱▱▱▱ 18% · $228/d → -$5.7k",
+    150000: "✻ $1.5k/$1.4k ▰▰▰▰▰▰▰▰▰▰ 109% · Oct ▰▰▱▱▱▱▱▱▱▱ 18% · $273/d → -$7.1k",
 }
 for used, expected in cases.items():
     assert line(credits(used), today) == expected, line(credits(used), today)
 
-december = datetime.date(2026, 12, 31)
-assert line(credits(9007), december).endswith("resets Jan 1"), line(credits(9007), december)
+# December has 31 days too: the month's bar is nearly full on the last evening.
+december = datetime.datetime(2026, 12, 31, 23)
+assert "Dec ▰▰▰▰▰▰▰▰▰▰ 100% · $3/d" in line(credits(9007), december), line(credits(9007), december)
+
+# A minute into the month counts as an hour, not as a whole day's spend.
+first_minute = datetime.datetime(2026, 10, 1, 0, 1)
+assert line(credits(500), first_minute).endswith("$120/d → -$2.4k"), line(credits(500), first_minute)
 
 plan = {"five_hour": {"utilization": 2.0}, "seven_day": {"utilization": 41.6},
         "extra_usage": {"is_enabled": False}}
